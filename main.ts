@@ -33,9 +33,22 @@ const YOUTUBE_ADDRESS =
   /^https:\/\/(www\.youtube\.com\/(shorts\/|watch\?v=)|youtu\.be\/)([A-Za-z0-9_-]{11})([?&#].*)?$/;
 
 function readVideoUrl(botDir: string): string {
-  const parsed: unknown = JSON.parse(
-    readFileSync(join(botDir, 'VIDEO.json'), 'utf8'),
-  );
+  let raw: string;
+  try {
+    raw = readFileSync(join(botDir, 'VIDEO.json'), 'utf8');
+  } catch (err) {
+    throw new Error(
+      `cannot read VIDEO.json in ${botDir}: ${(err as Error).message}`,
+    );
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(
+      `VIDEO.json is not valid JSON: ${(err as Error).message}`,
+    );
+  }
   if (typeof parsed !== 'object' || parsed === null) {
     throw new Error('VIDEO.json must be a JSON object');
   }
